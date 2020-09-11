@@ -44,6 +44,7 @@ public class CurrencyConversionController {
 	@GetMapping("/currency-conversion-feign/from/{fromCurrency}/to/{toCurrency}/amount/{amount}/")
 	public CurrencyConversionBean retrievedConvertedCurrencyUsingFeign(@PathVariable String fromCurrency, 
 			@PathVariable String toCurrency, @PathVariable BigDecimal amount) {
+		LOGGER.info("Inside retrievedConvertedCurrencyUsingFeign method");
 		CurrencyConversionBean response = currencyExchangeProxy.retrieveExchangeValue(fromCurrency, toCurrency);
 		response.setAmount(amount);
 		response.setConvertedAmount(amount.multiply(response.getConversionMultiple()));

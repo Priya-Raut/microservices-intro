@@ -23,7 +23,7 @@ public class CurrencyExchangeController {
 	@GetMapping("/currency-exchange/from/{fromCurrency}/to/{toCurrency}/")
 	public Exchange retrieveExchangeValue(@PathVariable String fromCurrency, 
 			@PathVariable String toCurrency) {
-		LOGGER.debug("fromCurrency: " + fromCurrency + " toCurrency: " + toCurrency);
+		LOGGER.info("fromCurrency: " + fromCurrency + " toCurrency: " + toCurrency);
 		Exchange exchangeValue = currencyExchangeService.findExchangeValueForCurrencies(fromCurrency, toCurrency);
 		exchangeValue.setPort(Integer.valueOf(environment.getProperty("local.server.port")));
 		return exchangeValue;
