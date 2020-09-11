@@ -21,13 +21,20 @@ This project explores different components of Spring Cloud along the way.
 2. Dynamic scaling, load balancing
 3. Visibility
 
-### 1. Steps for Configuration Management (using Spring Cloud Config Server)
+### Steps for Configuration Management (using Spring Cloud Config Server)
 1. Create a component for Spring Cloud Config Server. Add config server dependency. Use @EnableConfigServer annotation.
 2. Create a git repository for storing configurations. Create different config files for different environments/profiles e.g dev, qa, uat etc.
 Note: make sure config files are committed.
 3. Give repo path in config server's application.properties file.
 4. Create a component for a microservice which reads configuration. Rename application.properties to bootstrap.properties.
 Give url of config server and mention active profile. (By default reads config from default profile.)
+
+Disadvantage:
+Need to hit http://<server:port>/actuator/refresh to reflect changes in git repo in the service. This needs to be done for all the instances of the service. Quite cumbersome! 
+(Need to enable it in application.properties of service)
+
+Solution:
+Use of Cloud Bus. Just hit http://<server:port>/actuator/bus-refresh and all the instances of the service will see the latest config from the repo.
 
 ### Calling one microservice from another
 
@@ -40,11 +47,11 @@ Disadvantage: We have hardcode the url and in that port the service is running o
 Way to overcome it: Use Client Side load balancing using Ribbon
 
 
-### Using Client Side Load Balancing using Ribbon
-- Add dependency spring-cloud-starter-netflix-ribbon in pom.xml
-- Add @RibbonClient annotation to proxy interface of the service to be called
-- Remove url of the service from @FeignClient annotation
-- Give urls with ports in application.properties
+### Steps for using Client Side Load Balancing using Ribbon
+1. Add dependency spring-cloud-starter-netflix-ribbon in pom.xml
+2. Add @RibbonClient annotation to proxy interface of the service to be called
+3. Remove url of the service from @FeignClient annotation
+4. Give urls with ports in application.properties
 
 Disadvantage: 
 
@@ -55,7 +62,7 @@ Ways to improve:
 Register the instance with a Naming Server. (a.k.a Service Registration)
 Ask Ribbon to fetch url of the service instances from the naming server. (a.k.a Service Discovery)
 
-### Using Eureka Naming Server for service registration and service discovery
+### Steps for using Eureka Naming Server for service registration and service discovery
 1. Create a component
 2. Configure services with naming server
 3. Configure Ribbon to find information about existing instances of the services
@@ -88,3 +95,21 @@ Thus, gateway is an ideal place to implement following common functionalities
 How to configure API Gateway to be called in between two services?
 1. Configure proxy interface to talk to API Gateway using Feign Client (@FeignClient("api-gateway"). API Gateway talks to the service via @RibbonClient(service-name).
 2. Call the service using http://localhost:api-gateway-port/service-name/rest-of-the-path 
+
+### Steps for using distributed tracing using Spring Cloud Sleuth and Zipkin
+Spring Cloud Sleuth : Adds a trace id to the request as it goes through API Gateway and across multiple microservices. This trace id is visible in the logs.
+
+Disadvantage: 
+
+It is cumbersome to find the logs having same trace id.
+
+Solution: 
+
+With a log aggregation mechanism and a UI where all the logs from all the microservices are visible. 
+
+Here's how the entire solution looks like:
+All microservices -> RabbitMQ -> Zipkin Distributed Tracing Server -> Database
+
+0. Install Zipkin and RabbitMQ.
+1. Make all the microservices put the log into RabbitMQ (Set dependencies for Sleuth->RabbitMQ->Zipkin)
+2. Connect RabbitMQ with Zipkin (RABBITMQ_URI=amqp://localhost java -jar zipkin.jar)
