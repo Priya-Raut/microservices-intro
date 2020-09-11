@@ -34,7 +34,10 @@ Need to hit http://<server:port>/actuator/refresh to reflect changes in git repo
 (Need to enable it in application.properties of service)
 
 Solution:
-Use of Cloud Bus. Just hit http://<server:port>/actuator/bus-refresh and all the instances of the service will see the latest config from the repo.
+Use of Cloud Bus. 
+1. Add dependency in spring cloud config server and the service acting as config client. 
+2. Enable it in bootstrap.properties file of the service.
+Just hit http://<server:port>/actuator/bus-refresh and all the instances of the service will see the latest config from the repo.
 
 ### Calling one microservice from another
 
@@ -113,3 +116,8 @@ All microservices -> RabbitMQ -> Zipkin Distributed Tracing Server -> Database
 0. Install Zipkin and RabbitMQ.
 1. Make all the microservices put the log into RabbitMQ (Set dependencies for Sleuth->RabbitMQ->Zipkin)
 2. Connect RabbitMQ with Zipkin (RABBITMQ_URI=amqp://localhost java -jar zipkin.jar)
+
+### Steps to use Fault tolerance using Hystrix
+1. Add depenency in pom.xml
+2. Add @EnableHystrix to Application class
+3. Add @HystrixCommand to the endpoint under consideration. Mention a default method to be called.
